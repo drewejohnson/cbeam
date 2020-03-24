@@ -21,9 +21,9 @@
  * $ cbeam < input.md > output.tex
  *
  * Task list in order of priority
- * TODO itemize and enumerate environments
  * TODO Better data structures for tracking environments
  * TODO Theme support
+ * TODO Function documentation
  * TODO Tables
  * TODO Inline captions e.g. ![This is the caption](image.pdf)
  * TODO Some command line processing
@@ -44,6 +44,8 @@ enum location {
 enum environment {
   TEXT,
   FIGURE,
+  LIST_BULLET,
+  LIST_NUMBER,
   NO_ENV,
 };
 
@@ -70,6 +72,24 @@ enum location check_start_frame(FILE* dest, enum location loc) {
     default:
       return IN_FRAME;
   }
+}
+
+int end_environment(FILE* dest, enum environment env)
+{
+  switch (env) {
+    case FIGURE:
+      fprintf(dest, "\\end{figure}\n");
+      break;
+    case LIST_BULLET:
+      fprintf(dest, "\\end{itemize}\n");
+      break;
+    case LIST_NUMBER:
+      fprintf(dest, "\\end{enumerate}\n");
+      break;
+    default:
+      break;
+    }
+  return 0;
 }
 
 enum special_token {
@@ -247,6 +267,43 @@ int process_title(char* line, FILE* dest)
   return 0;
 }
 
+int process_bullets(char* line, FILE* dest)
+{
+  if ((line[0] != '*' || line[0] != '-') && !isspace(line[1])) {
+    fprintf(stderr, "Malformed bulleted list: Must match '[*|-] ': %s\n", line);
+    return 1;
+  }
+  fprintf(dest, "\\item{%s}\n", strip_whitespace(&(line[2])));
+  return 0;
+}
+
+int check_enumerate(char* line)
+{
+  int location = 0;
+  for (location; location < strlen(line); ++location) {
+    if (!isdigit(line[location])) {
+      break;
+    }
+  }
+  if (location == 0 || location >= strlen(line) - 3) {
+    return -1;
+  }
+  if (line[location] != '.' || !isspace(line[location + 1])) {
+    return -1;
+  }
+  return location - 1;
+}
+
+int process_enumerate(char* line, FILE* dest)
+{
+  if (!isdigit(line[0]) && line[1] != '.' && !isspace(line[3])) {
+    fprintf(stderr, "Malformed numbered list. Must match '[0-9]*\\. '", line);
+    return 1;
+  }
+  fprintf(dest, "\\item{%s}\n", strip_whitespace(&(line[3])));
+  return 0;
+}
+
 int main(int argc, char* argv[])
 {
   char *line = NULL;
@@ -294,14 +351,8 @@ int main(int argc, char* argv[])
     if (is_linebreak(line)) {
       if (current_loc == IN_FRAME) {
         if (current_env != NO_ENV) {
-          switch (current_env) {
-            case FIGURE:
-              fprintf(destination, "\\end{figure}\n");
-              break;
-            default:
-              break;
-          }
-        current_env = NO_ENV;
+          end_environment(destination, current_env);
+          current_env = NO_ENV;
         }
         fprintf(destination, "\\end{frame}\n");
         current_loc = NO_FRAME;
@@ -315,13 +366,24 @@ int main(int argc, char* argv[])
       if (stat != 0)
         return stat;
     } else if ((line[0] == '*' || line[0] == '-') && isspace(line[1])) {
-      // Bullets
-      fprintf(stderr, "Lists are not allowed for now: %s\n", line);
-      return 1;
-    } else if (isdigit(line[0]) && line[1] == '.' && isspace(line[2])) {
-      // Numbered list
-      fprintf(stderr, "Lists are not allowed for now: %s\n", line);
-      return 1;
+      if (current_env != LIST_BULLET) {
+        end_environment(destination, current_env);
+        fprintf(destination, "\\begin{itemize}\n");
+        current_env = LIST_BULLET;
+      }
+      if ((stat = process_bullets(line, destination)))
+        return stat;
+    } else if (isdigit(line[0])) {
+      stat = check_enumerate(line);
+      if (stat >= 0) {
+        if (current_env != LIST_NUMBER) {
+          end_environment(destination, current_env);
+          fprintf(destination, "\\begin{enumerate}\n");
+          current_env = LIST_NUMBER;
+        }
+        if (stat = process_enumerate(&(line[stat]), destination))
+          return stat;
+        }
     } else if (line[0] == '!') {
       // Don't like having to put this everywhere...
       current_loc = check_start_frame(destination, current_loc);

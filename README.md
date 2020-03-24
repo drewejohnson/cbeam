@@ -44,8 +44,13 @@ most of the capabilities and rules.
 
 ### Rules
 
+
 Frames are considered to be lines of text separated by one or more empty
-lines. A frame title can be configured by starting a line with two asterisks,
+lines. Lines are processed separate from previous and subsequent lines.
+It is the opinion of the author that frames should not have too much text.
+Lists especially should be fairly short.
+
+A frame title can be configured by starting a line with two asterisks,
 ```
 
 **Frame title**
@@ -89,6 +94,12 @@ not render well.
 
 The first slide is always a title slide.
 
+Bulleted and numbered lists are captured directly from Markdown.
+Bullets create ``itemize`` environments and must start with either
+``* `` or ``- ``. Note the space. Numbered lists don't have to be ordered,
+just matching the pattern ``^[0-9]+\. ``. The content following any initial 
+whitespace is placed directly inside an ``\item{content}`` directive.
+
 Some text command are provided to help configure the
 preamble and table of contents. Many of the commands are of the form
 ``:cmd: Value`` where the ``Value`` argument will be dumped into
@@ -112,7 +123,6 @@ These commands should be included inside the main body of your document.
 ### Not yet
 In order of decreasing priority
 
-- Itemize or enumerated sections (big oof)
 - Themes (oof)
 - Nested lists
 - In-line captions for figures

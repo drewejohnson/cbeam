@@ -24,6 +24,19 @@ Sad frame.
 
 ## New section
 
+**Lists**
+- Only single level lists are supported for now
+* You can mix symbols and they will be treated as the same bulletted list
+1. Switching to numbers will terminate the list and switch to enumerations
+1. Just like markdown, number doesn't matter, just that it's a numeric entry followed by a period and a space
+8. This is really the third item. The next line is an edge case
+1111111111. a
+
+**Long lines**
+- The contents of a single line are passed to a list item
+- Line continuation is not supported as each line is treated separately from previous and next lines
+- This hopefully discourages very long list items
+
 ### Subsection
 
 **Images too!**
