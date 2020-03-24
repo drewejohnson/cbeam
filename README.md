@@ -110,6 +110,10 @@ the corresponding tex command.
 - ``:author: Author list`` configures the author list. 
 - ``:date: today`` configures the date. If ``today`` is found, the special ``\today``
   value will be set
+- ``:theme: Theme`` configures the primary document theme
+- ``:colors: scheme`` configures the color theme
+- ``:inner: inner`` configures the inner theme
+- ``:outer: outer`` configures the outer theme
 
 ### Main document commands
 These commands should be included inside the main body of your document.
@@ -123,7 +127,6 @@ These commands should be included inside the main body of your document.
 ### Not yet
 In order of decreasing priority
 
-- Themes (oof)
 - Nested lists
 - In-line captions for figures
 - Tables (can use ``\input{table.tex}`` as a work around)

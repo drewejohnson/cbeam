@@ -100,6 +100,10 @@ enum special_token {
   LABEL,
   TOC,
   UNDEFINED,
+  THEME,
+  COLOR_THEME,
+  INNER_THEME,
+  OUTER_THEME
 };
 
 enum special_token check_token(char* substr)
@@ -116,6 +120,14 @@ enum special_token check_token(char* substr)
     return LABEL;
   if (NULL != strstr(substr, ":toc:"))
     return TOC;
+  if (NULL != strstr(substr, ":theme:"))
+    return THEME;
+  if (NULL != strstr(substr, ":colors:"))
+    return COLOR_THEME;
+  if (NULL != strstr(substr, ":inner:"))
+    return INNER_THEME;
+  if (NULL != strstr(substr, ":outer:"))
+    return OUTER_THEME;
   return NO;
 }
 
@@ -171,6 +183,22 @@ int process_special(enum special_token token, char* substr, FILE* dest)
     case TOC:
       fprintf(dest, "\\frame{\\tableofcontents}\n");
       return 0;
+    case THEME:
+      delim = ":theme:";
+      lead = "usetheme";
+      break;
+    case COLOR_THEME:
+      delim = ":colors:";
+      lead = "usecolortheme";
+      break;
+    case INNER_THEME:
+      delim = ":inner:";
+      lead = "useinnertheme";
+      break;
+    case OUTER_THEME:
+      delim = ":outer:";
+      lead = "useoutertheme";
+      break;
     default:
       return 1;
   }

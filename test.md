@@ -1,6 +1,7 @@
 :author: Andrew Johnson
 :date: today
-
+:theme: Boadilla
+:inner: rectangles
 # This is the title
 
 :toc:
