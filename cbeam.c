@@ -30,10 +30,10 @@
  * TODO In-line processing (urls, bold, italics)
  */
 
+#include <ctype.h> // isspace
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>  // isspace
 
 enum location {
   PREAMBLE,
@@ -49,7 +49,7 @@ enum environment {
   NO_ENV,
 };
 
-enum location start_document(FILE* dest, int titlepage)
+enum location start_document(FILE *dest, int titlepage)
 {
   fprintf(dest, "\n\\begin{document}\n");
   if (titlepage)
@@ -57,38 +57,40 @@ enum location start_document(FILE* dest, int titlepage)
   return NO_FRAME;
 }
 
-enum location start_frame(FILE* dest) {
+enum location start_frame(FILE *dest)
+{
   fprintf(dest, "\n\\begin{frame}\n");
   return IN_FRAME;
 }
 
-enum location check_start_frame(FILE* dest, enum location loc) {
+enum location check_start_frame(FILE *dest, enum location loc)
+{
   switch (loc) {
-    case PREAMBLE:
-      start_document(dest, 1);
-      return start_frame(dest);
-    case NO_FRAME:
-      return start_frame(dest);
-    default:
-      return IN_FRAME;
+  case PREAMBLE:
+    start_document(dest, 1);
+    return start_frame(dest);
+  case NO_FRAME:
+    return start_frame(dest);
+  default:
+    return IN_FRAME;
   }
 }
 
-int end_environment(FILE* dest, enum environment env)
+int end_environment(FILE *dest, enum environment env)
 {
   switch (env) {
-    case FIGURE:
-      fprintf(dest, "\\end{figure}\n");
-      break;
-    case LIST_BULLET:
-      fprintf(dest, "\\end{itemize}\n");
-      break;
-    case LIST_NUMBER:
-      fprintf(dest, "\\end{enumerate}\n");
-      break;
-    default:
-      break;
-    }
+  case FIGURE:
+    fprintf(dest, "\\end{figure}\n");
+    break;
+  case LIST_BULLET:
+    fprintf(dest, "\\end{itemize}\n");
+    break;
+  case LIST_NUMBER:
+    fprintf(dest, "\\end{enumerate}\n");
+    break;
+  default:
+    break;
+  }
   return 0;
 }
 
@@ -106,7 +108,7 @@ enum special_token {
   OUTER_THEME
 };
 
-enum special_token check_token(char* substr)
+enum special_token check_token(char *substr)
 {
   if (substr[0] != ':')
     return NO;
@@ -131,76 +133,79 @@ enum special_token check_token(char* substr)
   return NO;
 }
 
-int is_linebreak(char* line) {
-  for (int i=0; i < strlen(line); ++i) {
+int is_linebreak(char *line)
+{
+  for (int i = 0; i < strlen(line); ++i) {
     if (isspace(line[i]) == 0)
       return 0;
   }
   return 1;
 }
 
-char* strip_whitespace(char* str)
+char *strip_whitespace(char *str)
 {
   // Remove leading whitespace by offsetting the
   // start of the string
-  while (isspace((unsigned char)*str)) ++str;
+  while (isspace((unsigned char)*str))
+    ++str;
 
   if (*str == 0)
     return str;
 
-  char* end = str + strlen(str) - 1;
-  while (end > str && isspace((unsigned char)*end)) --end;
+  char *end = str + strlen(str) - 1;
+  while (end > str && isspace((unsigned char)*end))
+    --end;
   end[1] = '\0';
 
   return str;
 }
 
-int process_special(enum special_token token, char* substr, FILE* dest)
+int process_special(enum special_token token, char *substr, FILE *dest)
 {
-  char* delim;
-  char* lead;
+  char *delim;
+  char *lead;
   switch (token) {
-    case AUTHOR:
-      delim = ":author:";
-      lead = "author";
-      break;
-    case DATE:
-      if (NULL != strstr(substr, "today")) {
-        fprintf(dest, "\\date{\\today}\n");
-        return 0;
-      }
-      delim = ":date:";
-      lead = "date";
-      break;
-    case LABEL:
-      delim = ":label:";
-      lead = "label";
-      break;
-    case CAPTION:
-      delim = ":caption:";
-      lead = "caption";
-      break;
-    case TOC:
-      fprintf(dest, "\\frame{\\tableofcontents}\n");
+  case AUTHOR:
+    delim = ":author:";
+    lead = "author";
+    break;
+  case DATE:
+    if (NULL != strstr(substr, "today")) {
+      fprintf(dest, "\\date{\\today}\n");
       return 0;
-    case THEME:
-      delim = ":theme:";
-      lead = "usetheme";
-      break;
-    case COLOR_THEME:
-      delim = ":colors:";
-      lead = "usecolortheme";
-      break;
-    case INNER_THEME:
-      delim = ":inner:";
-      lead = "useinnertheme";
-      break;
-    case OUTER_THEME:
-      delim = ":outer:";
-      lead = "useoutertheme";
-      break;
-    default:
-      return 1;
+    }
+    delim = ":date:";
+    lead = "date";
+    break;
+  case LABEL:
+    delim = ":label:";
+    lead = "label";
+    break;
+  case CAPTION:
+    delim = ":caption:";
+    lead = "caption";
+    break;
+  case TOC:
+    fprintf(dest, "\\frame{\\tableofcontents}\n");
+    return 0;
+  case THEME:
+    delim = ":theme:";
+    lead = "usetheme";
+    break;
+  case COLOR_THEME:
+    delim = ":colors:";
+    lead = "usecolortheme";
+    break;
+  case INNER_THEME:
+    delim = ":inner:";
+    lead = "useinnertheme";
+    break;
+  case OUTER_THEME:
+    delim = ":outer:";
+    lead = "useoutertheme";
+    break;
+  default:
+    return 1;
   }
   substr = &substr[strlen(delim)];
   // Trim off new line character
@@ -211,7 +216,7 @@ int process_special(enum special_token token, char* substr, FILE* dest)
   return 0;
 }
 
-int get_heading_level(char* line)
+int get_heading_level(char *line)
 {
   int level = 0;
 
@@ -221,10 +226,10 @@ int get_heading_level(char* line)
   return level;
 }
 
-int process_heading(char* line, int level, FILE* dest)
+int process_heading(char *line, int level, FILE *dest)
 {
   // Only support leading # for now
-  char* heading = strip_whitespace(&(line[level]));
+  char *heading = strip_whitespace(&(line[level]));
 
   if (level == 1) {
     fprintf(dest, "\\title{%s}\n", heading);
@@ -238,32 +243,32 @@ int process_heading(char* line, int level, FILE* dest)
   return level;
 }
 
-int process_image(char* line, FILE* dest)
+int process_image(char *line, FILE *dest)
 {
   if (line[0] != '!' || line[1] != '[') {
     fprintf(stderr, "Malformed image line: %s\n", line);
     return 1;
   }
 
-  int cap_start=2, cap_end=0, img_end=0;
+  int cap_start = 2, cap_end = 0, img_end = 0;
 
   // Form: [caption](image)
   // Caption block can be empty
 
-  for (int i=cap_start; i < strlen(line); ++i) {
-      if (line[i] == ']') {
-        if (cap_end != 0) {
-          fprintf(stderr, "Malformed image line: %s\n", line);
-          return 1;
-        }
-        cap_end = i;
-      } else if (line[i] == ')') {
-        if (img_end != 0) {
-          fprintf(stderr, "Malformed image line: %s\n", line);
-          return 1;
-        }
-        img_end = i;
+  for (int i = cap_start; i < strlen(line); ++i) {
+    if (line[i] == ']') {
+      if (cap_end != 0) {
+        fprintf(stderr, "Malformed image line: %s\n", line);
+        return 1;
       }
+      cap_end = i;
+    } else if (line[i] == ')') {
+      if (img_end != 0) {
+        fprintf(stderr, "Malformed image line: %s\n", line);
+        return 1;
+      }
+      img_end = i;
+    }
   }
   if (cap_end == 0 || img_end == 0 || img_end < cap_end) {
     fprintf(stderr, "Malformed image line: %s\n", line);
@@ -272,8 +277,10 @@ int process_image(char* line, FILE* dest)
 
   line[img_end] = '\0';
 
-  fprintf(dest, "\\includegraphics[width=0.6\\textwidth,height=0.6\\textheight,keepaspectratio]{%s}\n",
-      &(line[cap_end + 2]));
+  fprintf(dest,
+          "\\includegraphics[width=0.6\\textwidth,height=0.6\\textheight,"
+          "keepaspectratio]{%s}\n",
+          &(line[cap_end + 2]));
 
   if (cap_end > cap_start + 1) {
     fprintf(stderr, "In-line captions not supported at this moment\n");
@@ -282,9 +289,9 @@ int process_image(char* line, FILE* dest)
   return 0;
 }
 
-int process_title(char* line, FILE* dest)
+int process_title(char *line, FILE *dest)
 {
-  char* title = strip_whitespace(line);
+  char *title = strip_whitespace(line);
   int end = strlen(title);
 
   if (title[end - 1] == '*' && title[end - 2] == '*') {
@@ -295,7 +302,7 @@ int process_title(char* line, FILE* dest)
   return 0;
 }
 
-int process_bullets(char* line, FILE* dest)
+int process_bullets(char *line, FILE *dest)
 {
   if ((line[0] != '*' || line[0] != '-') && !isspace(line[1])) {
     fprintf(stderr, "Malformed bulleted list: Must match '[*|-] ': %s\n", line);
@@ -305,7 +312,7 @@ int process_bullets(char* line, FILE* dest)
   return 0;
 }
 
-int check_enumerate(char* line)
+int check_enumerate(char *line)
 {
   int location = 0;
   for (location; location < strlen(line); ++location) {
@@ -322,7 +329,7 @@ int check_enumerate(char* line)
   return location - 1;
 }
 
-int process_enumerate(char* line, FILE* dest)
+int process_enumerate(char *line, FILE *dest)
 {
   if (!isdigit(line[0]) && line[1] != '.' && !isspace(line[3])) {
     fprintf(stderr, "Malformed numbered list. Must match '[0-9]*\\. '", line);
@@ -332,7 +339,7 @@ int process_enumerate(char* line, FILE* dest)
   return 0;
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
   char *line = NULL;
   size_t len = 0;
@@ -340,8 +347,8 @@ int main(int argc, char* argv[])
   enum special_token token;
   enum location current_loc = PREAMBLE;
   enum environment current_env = NO_ENV;
-  int stat, list_level=0;
-  FILE* destination = stdout;
+  int stat, list_level = 0;
+  FILE *destination = stdout;
 
   // Begin processing directly to stdout
   fprintf(destination, "\\documentclass{beamer}\n");
@@ -373,7 +380,6 @@ int main(int argc, char* argv[])
       }
       process_heading(line, stat, destination);
       continue;
-
     }
 
     if (is_linebreak(line)) {
@@ -411,7 +417,7 @@ int main(int argc, char* argv[])
         }
         if (stat = process_enumerate(&(line[stat]), destination))
           return stat;
-        }
+      }
     } else if (line[0] == '!') {
       // Don't like having to put this everywhere...
       current_loc = check_start_frame(destination, current_loc);
@@ -435,7 +441,7 @@ int main(int argc, char* argv[])
     if (current_env == FIGURE) {
       fprintf(destination, "\\end{figure}\n");
     }
-    fprintf(destination, "\\end{frame}\n");
+  fprintf(destination, "\\end{frame}\n");
 
   fprintf(destination, "\\end{document}\n");
   return 0;
