@@ -419,9 +419,9 @@ int main(int argc, char *argv[])
           return stat;
       }
     } else if (line[0] == '!') {
-      // Don't like having to put this everywhere...
       current_loc = check_start_frame(destination, current_loc);
       if (current_env != FIGURE) {
+        end_environment(destination, current_env);
         fprintf(destination, "\\begin{figure}\n");
         current_env = FIGURE;
       }
@@ -437,10 +437,9 @@ int main(int argc, char *argv[])
   }
   free(line);
 
-  if (current_loc == IN_FRAME)
-    if (current_env == FIGURE) {
-      fprintf(destination, "\\end{figure}\n");
-    }
+  if (current_loc == IN_FRAME) {
+    end_environment(destination, current_env);
+  }
   fprintf(destination, "\\end{frame}\n");
 
   fprintf(destination, "\\end{document}\n");
