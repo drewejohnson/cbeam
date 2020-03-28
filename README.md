@@ -27,7 +27,15 @@ and beamer tex files. See the limitations section for what it can't do (yet or e
 
 ## Installation
 
-A super boring Makefile is provided, but your c compiler of choice should work fine.
+A super boring Makefile is provided, allowing you to make
+```
+$ make
+```
+and test
+```
+$ make test
+``` 
+the utility. Your c compiler of choice should work fine.
 ```
 $ gcc cbeam.c -o cbeam
 ```
