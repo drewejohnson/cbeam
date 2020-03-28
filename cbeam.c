@@ -22,8 +22,6 @@
  *
  * Task list in order of priority
  * TODO Better data structures for tracking environments
- * TODO Theme support
- * TODO Function documentation
  * TODO Tables
  * TODO Inline captions e.g. ![This is the caption](image.pdf)
  * TODO Some command line processing
@@ -49,6 +47,12 @@ enum environment {
   NO_ENV,
 };
 
+/**
+ * Start the document section, optionally with a title slide
+ * \param dest Writable destination file
+ * \param titlepage integer flag used to write title slide or not
+ * \return current no-frame environment
+ */
 enum location start_document(FILE *dest, int titlepage)
 {
   fprintf(dest, "\n\\begin{document}\n");
@@ -57,12 +61,20 @@ enum location start_document(FILE *dest, int titlepage)
   return NO_FRAME;
 }
 
+//! Write a frame start and return in-frame environment
 enum location start_frame(FILE *dest)
 {
   fprintf(dest, "\n\\begin{frame}\n");
   return IN_FRAME;
 }
 
+/**
+ * Check if a frame should be started, starting if necessary
+ *
+ * \param dest Writable destination file
+ * \param loc Current location in the document (preamble, in or out of frame)
+ * \return In-frame enumeration
+ */
 enum location check_start_frame(FILE *dest, enum location loc)
 {
   switch (loc) {
@@ -76,6 +88,12 @@ enum location check_start_frame(FILE *dest, enum location loc)
   }
 }
 
+/**
+ * End a specific environment
+ * \param dest Writable destination file
+ * \param env Current environment
+ * \return 0 if the environment was safely ended, non-zero otherwise
+ */
 int end_environment(FILE *dest, enum environment env)
 {
   switch (env) {
@@ -108,6 +126,11 @@ enum special_token {
   OUTER_THEME
 };
 
+/**
+ * Parse a substring for a special command
+ * \param substr String potentially containing a special command
+ * \return Indicator of the discovered substring
+ */
 enum special_token check_token(char *substr)
 {
   if (substr[0] != ':')
@@ -133,6 +156,11 @@ enum special_token check_token(char *substr)
   return NO;
 }
 
+/**
+ * Check if a line is empty
+ * \param line Single line of text
+ * \return Flag denoting if the entire line is full of whitespace
+ */
 int is_linebreak(char *line)
 {
   for (int i = 0; i < strlen(line); ++i) {
@@ -142,6 +170,7 @@ int is_linebreak(char *line)
   return 1;
 }
 
+//! Removing leading and trailing whitespace from a line
 char *strip_whitespace(char *str)
 {
   // Remove leading whitespace by offsetting the
@@ -160,6 +189,13 @@ char *strip_whitespace(char *str)
   return str;
 }
 
+/**
+ * Write content depending on a parsed special token
+ * \param special_token User command found in the substring
+ * \param substr Line provided by user containing the special command
+ * \param dest Writable destination file
+ * \return Status if the token was processed and content written
+ */
 int process_special(enum special_token token, char *substr, FILE *dest)
 {
   char *delim;
@@ -216,6 +252,7 @@ int process_special(enum special_token token, char *substr, FILE *dest)
   return 0;
 }
 
+//! Return the number of leading heading markers
 int get_heading_level(char *line)
 {
   int level = 0;
@@ -226,6 +263,13 @@ int get_heading_level(char *line)
   return level;
 }
 
+/**
+ * Process the heading, making title or (sub)sections
+ * \param line User-provided line including initial heading marks
+ * \param level Heading level (1 for title, 2 for section, 3+ for subsections
+ * \param dest Writable destination file
+ * \return level is passed back
+ */
 int process_heading(char *line, int level, FILE *dest)
 {
   // Only support leading # for now
@@ -243,6 +287,12 @@ int process_heading(char *line, int level, FILE *dest)
   return level;
 }
 
+/**
+ * Process and write an image directive
+ * \param line Markdown image command ![](image)
+ * \param dest Writable destination file
+ * \return 0 on sucess, non-zero if the line is malformed
+ */
 int process_image(char *line, FILE *dest)
 {
   if (line[0] != '!' || line[1] != '[') {
@@ -289,6 +339,16 @@ int process_image(char *line, FILE *dest)
   return 0;
 }
 
+/**
+ * Create a frame title from a character array
+ *
+ * Removes leading and trailing whitespace from the
+ * line, and trims off the tail "**" if they exist
+ *
+ * \param line Character array to be processed
+ * \param dest Writable destination file
+ * \return 0 on success, 1 one failure
+ */
 int process_title(char *line, FILE *dest)
 {
   char *title = strip_whitespace(line);
@@ -302,6 +362,17 @@ int process_title(char *line, FILE *dest)
   return 0;
 }
 
+/**
+ * Create a itemize item from a line
+ *
+ * Expects the line to match the pattern "^[*|-] (.*)" where the
+ * later group will be placed inside an item command. Writes to
+ * stderr on failure.
+ *
+ * \param line Character array to be processed
+ * \param dest Writable destination file
+ * \return 0 on success, 1 on failure
+ */
 int process_bullets(char *line, FILE *dest)
 {
   if ((line[0] != '*' || line[0] != '-') && !isspace(line[1])) {
@@ -312,6 +383,18 @@ int process_bullets(char *line, FILE *dest)
   return 0;
 }
 
+/**
+ * Determine the starting position of an enumerated list
+ *
+ * A little complicated, because it does support numbers
+ * like "12. " even though they don't get converted directly.
+ * check_enumerate("1. Hello world") would return 0, while
+ * check_enumerate("111. Hello world") would return 2. A return
+ * of -1 indicates the line is not well formed.
+ *
+ * \param line Character array that may or may contain an enumeration
+ * \return Index of the last numeric character before the start of the content.
+ */
 int check_enumerate(char *line)
 {
   int location = 0;
@@ -329,6 +412,14 @@ int check_enumerate(char *line)
   return location - 1;
 }
 
+/**
+ * Create a new enumerate item
+ *
+ * Expects a pattern of ^[0-9]*\.
+ * \param line Character array to be parsed
+ * \param dest Writable destination file
+ * \return 0 on success, 1 if the line is incorrectly formed
+ */
 int process_enumerate(char *line, FILE *dest)
 {
   if (!isdigit(line[0]) && line[1] != '.' && !isspace(line[3])) {
