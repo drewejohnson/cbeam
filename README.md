@@ -27,15 +27,22 @@ and beamer tex files. See the limitations section for what it can't do (yet or e
 
 ## Installation
 
-A super boring Makefile is provided, allowing you to make
+A super boring Makefile is provided, allowing you to make, test, and install
+the utility
 ```
 $ make
-```
-and test
-```
 $ make test
-``` 
-the utility. Your c compiler of choice should work fine.
+$ make install
+```
+The ``install`` command will try and move ``cbeam`` into ``/usr/bin``,
+which you (understandably) may not want to do nor be able to do. To
+install into a different location, like ``~/.local/bin``, you can
+overwrite the ``INSTALL_DIR`` with
+```
+$ make INSTALL_DIR=~/.local/bin install
+```
+
+Your c compiler of choice should work fine.
 ```
 $ gcc cbeam.c -o cbeam
 ```

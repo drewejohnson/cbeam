@@ -1,5 +1,11 @@
+INSTALL_DIR:=/usr/bin
+
 cbeam : cbeam.c
 	gcc $< -o $@
+
+install : cbeam
+	test -d ${INSTALL_DIR}
+	mv $< ${INSTALL_DIR}
 
 test : cbeam
 	./$< < test.md | diff --ignore-all-space test.tex -
