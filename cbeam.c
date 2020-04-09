@@ -530,8 +530,8 @@ int main(int argc, char *argv[])
 
   if (current_loc == IN_FRAME) {
     end_environment(destination, current_env);
+    fprintf(destination, "\\end{frame}\n");
   }
-  fprintf(destination, "\\end{frame}\n");
 
   fprintf(destination, "\\end{document}\n");
   return 0;
