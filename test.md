@@ -27,6 +27,8 @@ Sad frame.
 
 ## New section
 
+:sectionpage:
+
 **Lists**
 - Only single level lists are supported for now
 * You can mix symbols and they will be treated as the same bulletted list

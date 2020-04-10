@@ -119,6 +119,7 @@ enum special_token {
   CAPTION,
   LABEL,
   TOC,
+  SECTION_PAGE,
   UNDEFINED,
   THEME,
   PACKAGE,
@@ -136,6 +137,8 @@ enum special_token check_token(char *substr)
 {
   if (substr[0] != ':')
     return NO;
+  if (NULL != strstr(substr, ":sectionpage:"))
+    return SECTION_PAGE;
   if (NULL != strstr(substr, ":author:"))
     return AUTHOR;
   if (NULL != strstr(substr, ":date:"))
@@ -226,6 +229,9 @@ int process_special(enum special_token token, char *substr, FILE *dest)
     break;
   case TOC:
     fprintf(dest, "\\frame{\\tableofcontents}\n");
+    return 0;
+  case SECTION_PAGE:
+    fprintf(dest, "\\frame{\\sectionpage}\n");
     return 0;
   case THEME:
     delim = ":theme:";
@@ -456,7 +462,7 @@ int main(int argc, char *argv[])
 
     // Process special potentially non-frame information
     if ((token = check_token(line)) != NO) {
-      if (token == TOC && current_loc == PREAMBLE) {
+      if ((token == TOC || token == SECTION_PAGE) && current_loc == PREAMBLE) {
         start_document(destination, 1);
         current_loc = NO_FRAME;
       }

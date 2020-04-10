@@ -136,6 +136,7 @@ These commands should be included inside the main body of your document.
 - ``:toc:`` triggers a frame devoted to the table of contents. No arguments are used
 - ``:caption: Caption`` sets a (figure only) caption
 - ``:label: ref`` sets a reference (for a figure. Sections etc. maybe?)
+- ``:sectionpage: `` creates a frame that introduces a section with ``sectionpage``
 
 ## Limitations
 
