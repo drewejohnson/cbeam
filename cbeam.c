@@ -341,7 +341,7 @@ int process_image(char *line, FILE *dest)
   line[img_end] = '\0';
 
   fprintf(dest,
-          "\\includegraphics[width=0.6\\textwidth,height=0.6\\textheight,"
+          "\\includegraphics[width=0.8\\textwidth,height=0.6\\textheight,"
           "keepaspectratio]{%s}\n",
           &(line[cap_end + 2]));
 
