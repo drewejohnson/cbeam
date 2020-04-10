@@ -2,6 +2,8 @@
 :date: today
 :theme: Boadilla
 :inner: rectangles
+:pkg: hyperref
+
 # This is the title
 
 :toc:

@@ -121,6 +121,7 @@ enum special_token {
   TOC,
   UNDEFINED,
   THEME,
+  PACKAGE,
   COLOR_THEME,
   INNER_THEME,
   OUTER_THEME
@@ -139,6 +140,8 @@ enum special_token check_token(char *substr)
     return AUTHOR;
   if (NULL != strstr(substr, ":date:"))
     return DATE;
+  if (NULL != strstr(substr, ":pkg:"))
+    return PACKAGE;
   if (NULL != strstr(substr, ":caption:"))
     return CAPTION;
   if (NULL != strstr(substr, ":label:"))
@@ -227,6 +230,10 @@ int process_special(enum special_token token, char *substr, FILE *dest)
   case THEME:
     delim = ":theme:";
     lead = "usetheme";
+    break;
+  case PACKAGE:
+    delim = ":pkg:";
+    lead = "usepackage";
     break;
   case COLOR_THEME:
     delim = ":colors:";

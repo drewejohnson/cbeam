@@ -59,7 +59,6 @@ most of the capabilities and rules.
 
 ### Rules
 
-
 Frames are considered to be lines of text separated by one or more empty
 lines. Lines are processed separate from previous and subsequent lines.
 It is the opinion of the author that frames should not have too much text.
@@ -129,6 +128,7 @@ the corresponding tex command.
 - ``:colors: scheme`` configures the color theme
 - ``:inner: inner`` configures the inner theme
 - ``:outer: outer`` configures the outer theme
+- ``:pkg: package`` introduces a package with no options, ``\usepackage{package}``
 
 ### Main document commands
 These commands should be included inside the main body of your document.
@@ -149,7 +149,6 @@ In order of decreasing priority
 - Section overviews
 - In-line bold and italics using ``**markdown** __commands__`` (``\textbf{markdown} \textit{should}`` work)
 - Some input processing (read from file, write to file)
-- Package control (autoloads just ``graphicx``)
 
 ### Maybe ever
 
