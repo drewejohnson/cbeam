@@ -1,5 +1,7 @@
 INSTALL_DIR:=/usr/bin
 
+.PHONY: install test clean
+
 cbeam : cbeam.c
 	gcc $< -o $@
 
