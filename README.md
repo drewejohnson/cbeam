@@ -42,6 +42,11 @@ overwrite the ``INSTALL_DIR`` with
 $ make INSTALL_DIR=~/.local/bin install
 ```
 
+Additionally, you can provide the compiler through the Makefile with
+```
+$ make CC=cc
+```
+
 Your c compiler of choice should work fine.
 ```
 $ gcc cbeam.c -o cbeam

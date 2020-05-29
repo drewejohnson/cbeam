@@ -1,9 +1,10 @@
 INSTALL_DIR:=/usr/bin
+CC:=gcc
 
 .PHONY: install test clean
 
 cbeam : cbeam.c
-	gcc $< -o $@
+	${CC} $< -o $@
 
 install : cbeam
 	test -d ${INSTALL_DIR}
